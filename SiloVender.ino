@@ -4,14 +4,19 @@
 const int RotateClockwiseInputPin = 2;
 const int RotateConterClockwiseInputPin = 3;
 
-const int RotateClockWiseOutputPin = 13;
+const int RotateClockWiseOutputPin = 10;
 const int RotateConterClockwiseIOutputPin = 11;
-const unsigned long RunTime = 10; //Seconds
-const unsigned long DelayTime = 2; //Seconds
+const int TimerPotAnalogPin = 1;
+int TimerValue = 0;
+unsigned long RunTimeMin = 3; //Seconds
+unsigned long RunTime = 0;
+const unsigned long DelayTime = 1; //Seconds
+
 
 unsigned long time, timeZ1, timeZ2, RotateClockwiseSetTime, RotateConterClockwiseSetTime;
 bool RotateClockwiseCmd = false;
 bool RotateConterClockwiseCmd = false;
+bool ToggleHelper = false;
 
 bool RotateClockwiseSet, RotateClockwiseSet_Z = false;
 bool RotateConterClockwiseSet, RotateConterClockwiseSet_Z = false;
@@ -34,6 +39,8 @@ void setup()
 
 	pinMode(RotateClockWiseOutputPin, OUTPUT);
 	pinMode(RotateConterClockwiseIOutputPin, OUTPUT);
+
+	
 }
 
 void loop()
@@ -42,7 +49,8 @@ void loop()
 	time = millis();
 	RotateClockwiseCmd = !digitalRead(RotateClockwiseInputPin);
 	RotateConterClockwiseCmd = !digitalRead(RotateConterClockwiseInputPin);
-
+	TimerValue = analogRead(TimerPotAnalogPin);
+	RunTime = (TimerValue / 100) + RunTimeMin;
 	//Resetting Outputs
 	RotateClockwiseSet = false;
 	RotateConterClockwiseSet = false;
@@ -62,11 +70,13 @@ void loop()
 
 	else if (!RotateClockwiseCmd && !RotateConterClockwiseCmd)
 	{
-		if ((time-timeZ1)>RunTime)
+		if ((time-timeZ1)>(RunTime*1000))
 		{
-
+			ToggleHelper = !ToggleHelper;
 			timeZ1 = time;
 		}
+		RotateClockwiseSet = ToggleHelper;
+		RotateConterClockwiseSet = !ToggleHelper;
 	}
 
 	if (RotateClockwiseSet_Z && !RotateClockwiseSet)
@@ -79,13 +89,13 @@ void loop()
 		RotateConterClockwiseSetTime = time;
 	}
 
-	if ((time - RotateClockwiseSetTime)>(DelayTime * 1000) && RotateConterClockwiseSet)
+	if (((time - RotateClockwiseSetTime)>(DelayTime * 1000)) && RotateConterClockwiseSet)
 	{
 		
 		RotateConterClockwiseOut = true;
 	}
 
-	if ((time - RotateConterClockwiseSetTime)>(DelayTime * 1000) && RotateClockwiseSet )
+	if (((time - RotateConterClockwiseSetTime)>(DelayTime * 1000)) && RotateClockwiseSet )
 	{
 		RotateClockwiseOut = true;
 	}
@@ -104,9 +114,13 @@ void loop()
 
 	RotateClockwiseSet_Z = RotateClockwiseSet;
 	RotateConterClockwiseSet_Z = RotateConterClockwiseSet;
+	if ((time-timeZ2)>1000)
+	{
+		SendString = "C: " + String(RotateClockwiseOut) + "\n" + "CC: " + String(RotateConterClockwiseOut) + "\n"+ String(TimerValue);
+		Serial.println(SendString);
+		timeZ2 = time;
+	}
 
-	SendString = String(RotateClockwiseSet) + "\n" + String(RotateClockwiseOut);
-	Serial.println(SendString);
 
 	delay(5);
 }
