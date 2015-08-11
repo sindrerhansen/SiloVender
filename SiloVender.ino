@@ -82,11 +82,13 @@ void loop()
 	if (RotateClockwiseSet_Z && !RotateClockwiseSet)
 	{
 		RotateClockwiseSetTime = time;
+		timeZ1 = time;
 	}
 
 	if (RotateConterClockwiseSet_Z && !RotateConterClockwiseSet)
 	{
 		RotateConterClockwiseSetTime = time;
+		timeZ1 = time;
 	}
 
 	if (((time - RotateClockwiseSetTime)>(DelayTime * 1000)) && RotateConterClockwiseSet)
