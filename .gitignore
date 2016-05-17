@@ -11,6 +11,7 @@
 *.vcxproj
 *.vcxproj.filters
 __vm/
+Visual Micro/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
